@@ -6,8 +6,64 @@ from shutil import copyfile
 class GORTConan(ConanFile):
     name = "ortools"
     version = "8.0"
+    license = "Apache License 2.0"
+    url = "https://github.com/google/or-tools/"
+    description = "Google Optimization Tools"
     settings = "os", "compiler", "build_type", "arch"
     generators = "cmake_find_package"
+    options = {
+        "shared": [True, False],
+        "fPIC": [True, False],
+        "BUILD_DEPS": [True, False],
+        "BUILD_ZLIB": [True, False],
+        "BUILD_absl": [True, False],
+        "BUILD_gflags": [True, False],
+        "BUILD_glog": [True, False],
+        "BUILD_Protobuf": [True, False],
+        "USE_SCIP": [True, False],
+        "BUILD_SCIP": [True, False],
+        "USE_COINOR": [True, False],
+        "BUILD_CoinUtils": [True, False],
+        "BUILD_Osi": [True, False],
+        "BUILD_Clp": [True, False],
+        "BUILD_Cgl": [True, False],
+        "BUILD_Cbc": [True, False],
+        "BUILD_SAMPLES": [True, False],
+        "BUILD_EXAMPLES": [True, False]
+    }
+    default_options = {
+        'shared': False,
+        'fPIC': True,
+        'BUILD_DEPS': True,
+        'BUILD_ZLIB': True,
+        'BUILD_absl': True,
+        'BUILD_gflags': True,
+        'BUILD_glog': True,
+        'BUILD_Protobuf': True,
+        'USE_SCIP': True,
+        'BUILD_SCIP': True,
+        'USE_COINOR': True,
+        'BUILD_CoinUtils': True,
+        'BUILD_Osi': True,
+        'BUILD_Clp': True,
+        'BUILD_Cgl': True,
+        'BUILD_Cbc': True,
+        'BUILD_SAMPLES': False,
+        'BUILD_EXAMPLES': False
+    }
+
+    def config_options(self):
+        if self.settings.os == "Windows":
+            del self.options.fPIC
+
+    def configure(self):
+        if self.settings.os == "Windows" and self.options.shared:
+            raise ConanInvalidConfiguration(
+                "Shared build is not supported on Windows by upstream")
+
+    def requirements(self):
+        if not self.options.BUILD_ZLIB:
+            self.requires("zlib/1.2.11@")
 
     def source(self):
         if self.settings.os == "Windows":
@@ -25,18 +81,22 @@ class GORTConan(ConanFile):
         if self.settings.os == "Windows":
             cmake = CMake(self)
             cmake.definitions['CMAKE_INSTALL_PREFIX'] = self.package_folder
-            cmake.definitions['BUILD_DEPS'] = "ON"
-
-            cmake.definitions['USE_SCIP'] = "OFF"
-            cmake.definitions['BUILD_SCIP'] = "OFF"
-            cmake.definitions['USE_COINOR'] = "ON"
-            cmake.definitions['BUILD_CoinUtils'] = "ON"
-            cmake.definitions['BUILD_Osi'] = "ON"
-            cmake.definitions['BUILD_Clp'] = "ON"
-            cmake.definitions['BUILD_Cgl'] = "ON"
-            cmake.definitions['BUILD_Cbc'] = "ON"
-            cmake.definitions['BUILD_SAMPLES'] = "OFF"
-            cmake.definitions['BUILD_EXAMPLES'] = "OFF"
+            cmake.definitions['BUILD_DEPS'] = "ON" if self.options.BUILD_DEPS else "OFF"
+            cmake.definitions['BUILD_ZLIB'] = "ON" if self.options.BUILD_ZLIB else "OFF"
+            cmake.definitions['BUILD_absl'] = "ON" if self.options.BUILD_absl else "OFF"
+            cmake.definitions['BUILD_gflags'] = "ON" if self.options.BUILD_gflags else "OFF"
+            cmake.definitions['BUILD_glog'] = "ON" if self.options.BUILD_glog else "OFF"
+            cmake.definitions['BUILD_Protobuf'] = "ON" if self.options.BUILD_Protobuf else "OFF"
+            cmake.definitions['USE_SCIP'] = "ON" if self.options.USE_SCIP else "OFF"
+            cmake.definitions['BUILD_SCIP'] = "ON" if self.options.BUILD_SCIP else "OFF"
+            cmake.definitions['USE_COINOR'] = "ON" if self.options.USE_COINOR else "OFF"
+            cmake.definitions['BUILD_CoinUtils'] = "ON" if self.options.BUILD_CoinUtils else "OFF"
+            cmake.definitions['BUILD_Osi'] = "ON" if self.options.BUILD_Osi else "OFF"
+            cmake.definitions['BUILD_Clp'] = "ON" if self.options.BUILD_Clp else "OFF"
+            cmake.definitions['BUILD_Cgl'] = "ON" if self.options.BUILD_Cgl else "OFF"
+            cmake.definitions['BUILD_Cbc'] = "ON" if self.options.BUILD_Cbc else "OFF"
+            cmake.definitions['BUILD_SAMPLES'] = "ON" if self.options.BUILD_SAMPLES else "OFF"
+            cmake.definitions['BUILD_EXAMPLES'] = "ON" if self.options.BUILD_EXAMPLES else "OFF"
             cmake_source_folder = self.source_folder + "/or-tools"
             cmake_build_folder = self.source_folder + "/or-tools"
             cmake.configure(source_dir=cmake_source_folder,
@@ -59,7 +119,7 @@ class GORTConan(ConanFile):
                                       "-DUSE_CLP", "-DUSE_BOP", "-DUSE_GLOP"]
             self.cpp_info.cxxflags.append("/DNOMINMAX")
             common_libs = ["CbcSolver", "Cbc", "OsiCbc", "Cgl", "ClpSolver", "Clp", "OsiClp", "Osi", "CoinUtils",
-                           # "libscip",
+                           "libscip",
                            "absl_bad_any_cast_impl", "absl_bad_optional_access", "absl_bad_variant_access", "absl_base", "absl_city",
                            "absl_civil_time", "absl_cord", "absl_debugging_internal", "absl_demangle_internal",
                            "absl_examine_stack", "absl_exponential_biased", "absl_failure_signal_handler", "absl_flags", "absl_flags_config",
@@ -79,13 +139,17 @@ class GORTConan(ConanFile):
 
             self.cpp_info.release.libs = common_libs.copy()
             self.cpp_info.release.libs.extend([
-                "libprotobuf", "libprotobuf-lite", "libprotoc", "glog", "gflags_nothreads_static", "zlib"
+                "libprotobuf", "libprotobuf-lite", "libprotoc", "glog", "gflags_nothreads_static"
             ])
-
             self.cpp_info.debug.libs = common_libs.copy()
             self.cpp_info.debug.libs.extend([
-                "libprotobufd", "libprotobuf-lited", "libprotocd", "glogd", "gflags_nothreads_static_debug", "zlibd"
+                "libprotobufd", "libprotobuf-lited", "libprotocd", "glogd", "gflags_nothreads_static_debug"
             ])
+
+            if self.options.BUILD_ZLIB:
+                self.cpp_info.release.libs.append("zlib")
+                self.cpp_info.debug.libs.append("zlibd")
+
             self.cpp_info.libs = self.cpp_info.debug.libs if self.settings.build_type == "Debug" else self.cpp_info.release.libs
         else:  # assume Linux or compatible
             self.cpp_info.cxxflags = ["-DUSE_CBC",

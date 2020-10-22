@@ -21,14 +21,6 @@ double run(operations_research::MPSolver::OptimizationProblemType problemType, b
   if (log)
     LOG(INFO) << "Number of constraints = " << solver.NumConstraints();
 
-  const operations_research::MPObjective& obj = solver.Objective();
-  std::cout << "objective coefficient of x: " << obj.GetCoefficient(x) << " (should be 0)" << std::endl;
-  std::cout << "objective coefficient of y: " << obj.GetCoefficient(y) << " (should be 0)" << std::endl;
-
-  operations_research::MPObjective* const mut_obj = solver.MutableObjective();
-  std::cout << "objective coefficient of x: " << mut_obj->GetCoefficient(x) << " (should be 0)" << std::endl;
-  std::cout << "objective coefficient of y: " << mut_obj->GetCoefficient(y) << " (should be 0)" << std::endl;
-
   // Create the objective function, 3 * x + y.
   operations_research::MPObjective* const objective = solver.MutableObjective();
   objective->SetCoefficient(x, 3);
