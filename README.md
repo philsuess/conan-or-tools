@@ -10,12 +10,12 @@ Any help is VERY welcome!
 
 ## conan workflow
 
-1. conan install . -if debug -pr vs2019_debug
+1. conan install . -if debug -pr vs2019_debug -s compiler.cppstd=17 --build=missing
 2. conan source . (or, alternatively: cd or-tools; git clean -fd; cd ..)
 3. conan build . --source-folder=or-tools --build-folder=debug
 4. conan package . --source-folder=or-tools --build-folder=debug --package-folder=debug_package
-5. conan export-pkg . user/testing --package-folder=debug/package -pr vs2019_debug --force
-6. conan test test_package ortools/8.0@user/testing -pr vs2019_debug
+5. conan export-pkg . user/testing --package-folder=debug/package -pr vs2019_debug -s compiler.cppstd=17 --force
+6. conan test test_package ortools/8.0@user/testing -pr vs2019_debug -s compiler.cppstd=17
 
 ## Known issues
 

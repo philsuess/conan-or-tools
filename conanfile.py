@@ -57,6 +57,9 @@ class GORTConan(ConanFile):
             del self.options.fPIC
 
     def configure(self):
+        if self.settings.compiler.cppstd != 17:
+            raise ConanInvalidConfiguration(
+                "c++17 is required to build or-tools")
         if self.settings.os == "Windows" and self.options.shared:
             raise ConanInvalidConfiguration(
                 "Shared build is not supported on Windows by upstream")
