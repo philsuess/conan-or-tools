@@ -31,7 +31,7 @@ Any help is VERY welcome!
 - zlib from conan-center: works
 - gflags from conan-center: works
 - glog from conan-center: works
-- abseil from conan-center:
+- abseil from conan-center: conan test test_package ortools/8.0@user/testing -pr vs2019_debug produces linker errors for abseil
 
 ### Added
 

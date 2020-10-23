@@ -36,7 +36,7 @@ class GORTConan(ConanFile):
         'fPIC': True,
         'BUILD_DEPS': False,
         'BUILD_ZLIB': False,
-        'BUILD_absl': True,
+        'BUILD_absl': False,
         'BUILD_gflags': False,
         'BUILD_glog': False,
         'BUILD_Protobuf': True,
@@ -70,6 +70,9 @@ class GORTConan(ConanFile):
 
         if not self.options.BUILD_glog:
             self.requires("glog/0.4.0@")
+
+        if not self.options.BUILD_absl:
+            self.requires("abseil/20200923.2@")
 
     @property
     def _archive_url(self):
@@ -132,21 +135,24 @@ class GORTConan(ConanFile):
             self.cpp_info.cxxflags = ["-DUSE_CBC",
                                       "-DUSE_CLP", "-DUSE_BOP", "-DUSE_GLOP"]
             self.cpp_info.cxxflags.append("/DNOMINMAX")
-            common_libs = ["CbcSolver", "Cbc", "OsiCbc", "Cgl", "ClpSolver", "Clp", "OsiClp", "Osi", "CoinUtils",
-                           "absl_bad_any_cast_impl", "absl_bad_optional_access", "absl_bad_variant_access", "absl_base", "absl_city",
-                           "absl_civil_time", "absl_cord", "absl_debugging_internal", "absl_demangle_internal",
-                           "absl_examine_stack", "absl_exponential_biased", "absl_failure_signal_handler", "absl_flags", "absl_flags_config",
-                           "absl_flags_internal", "absl_flags_marshalling", "absl_flags_parse", "absl_flags_program_name",
-                           "absl_flags_usage", "absl_flags_usage_internal", "absl_graphcycles_internal", "absl_hash", "absl_hashtablez_sampler",
-                           "absl_int128", "absl_leak_check", "absl_leak_check_disable", "absl_log_severity", "absl_malloc_internal",
-                           "absl_random_distributions", "absl_random_internal_distribution_test_util", "absl_random_internal_pool_urbg",
-                           "absl_random_internal_randen", "absl_random_internal_randen_hwaes", "absl_random_internal_randen_hwaes_impl",
-                           "absl_random_internal_randen_slow", "absl_random_internal_seed_material", "absl_random_seed_gen_exception",
-                           "absl_random_seed_sequences", "absl_raw_hash_set", "absl_raw_logging_internal", "absl_scoped_set_env",
-                           "absl_spinlock_wait", "absl_stacktrace", "absl_status", "absl_str_format_internal", "absl_strings",
-                           "absl_strings_internal", "absl_symbolize", "absl_synchronization", "absl_throw_delegate", "absl_time", "absl_time_zone",
-                           "ortools"]
+            common_libs = ["CbcSolver", "Cbc", "OsiCbc", "Cgl",
+                           "ClpSolver", "Clp", "OsiClp", "Osi", "CoinUtils", "ortools"]
 
+            if self.options.BUILD_absl:
+                common_libs.extend([
+                    "absl_bad_any_cast_impl", "absl_bad_optional_access", "absl_bad_variant_access", "absl_base", "absl_city",
+                    "absl_civil_time", "absl_cord", "absl_debugging_internal", "absl_demangle_internal",
+                    "absl_examine_stack", "absl_exponential_biased", "absl_failure_signal_handler", "absl_flags", "absl_flags_config",
+                    "absl_flags_internal", "absl_flags_marshalling", "absl_flags_parse", "absl_flags_program_name",
+                    "absl_flags_usage", "absl_flags_usage_internal", "absl_graphcycles_internal", "absl_hash", "absl_hashtablez_sampler",
+                    "absl_int128", "absl_leak_check", "absl_leak_check_disable", "absl_log_severity", "absl_malloc_internal",
+                    "absl_random_distributions", "absl_random_internal_distribution_test_util", "absl_random_internal_pool_urbg",
+                    "absl_random_internal_randen", "absl_random_internal_randen_hwaes", "absl_random_internal_randen_hwaes_impl",
+                    "absl_random_internal_randen_slow", "absl_random_internal_seed_material", "absl_random_seed_gen_exception",
+                    "absl_random_seed_sequences", "absl_raw_hash_set", "absl_raw_logging_internal", "absl_scoped_set_env",
+                    "absl_spinlock_wait", "absl_stacktrace", "absl_status", "absl_str_format_internal", "absl_strings",
+                    "absl_strings_internal", "absl_symbolize", "absl_synchronization", "absl_throw_delegate", "absl_time", "absl_time_zone"
+                ])
             if self.options.BUILD_SCIP:
                 common_libs.append("libscip")
 
