@@ -38,7 +38,7 @@ class GORTConan(ConanFile):
         'BUILD_ZLIB': False,
         'BUILD_absl': True,
         'BUILD_gflags': False,
-        'BUILD_glog': True,
+        'BUILD_glog': False,
         'BUILD_Protobuf': True,
         'USE_SCIP': False,
         'BUILD_SCIP': False,
@@ -67,6 +67,9 @@ class GORTConan(ConanFile):
 
         if not self.options.BUILD_gflags:
             self.requires("gflags/2.2.2@")
+
+        if not self.options.BUILD_glog:
+            self.requires("glog/0.4.0@")
 
     @property
     def _archive_url(self):
@@ -153,17 +156,21 @@ class GORTConan(ConanFile):
 
             self.cpp_info.release.libs = common_libs.copy()
             self.cpp_info.release.libs.extend([
-                "libprotobuf", "libprotobuf-lite", "libprotoc", "glog"
+                "libprotobuf", "libprotobuf-lite", "libprotoc"
             ])
             self.cpp_info.debug.libs = common_libs.copy()
             self.cpp_info.debug.libs.extend([
-                "libprotobufd", "libprotobuf-lited", "libprotocd", "glogd"
+                "libprotobufd", "libprotobuf-lited", "libprotocd"
             ])
 
             if self.options.BUILD_gflags:
                 self.cpp_info.release.libs.append("gflags_nothreads_static")
                 self.cpp_info.debug.libs.append(
                     "gflags_nothreads_static_debug")
+
+            if self.options.BUILD_glog:
+                self.cpp_info.release.libs.append("glog")
+                self.cpp_info.debug.libs.append("glogd")
 
             if self.options.BUILD_ZLIB:
                 self.cpp_info.release.libs.append("zlib")
