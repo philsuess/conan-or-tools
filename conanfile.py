@@ -34,14 +34,14 @@ class GORTConan(ConanFile):
     default_options = {
         'shared': False,
         'fPIC': True,
-        'BUILD_DEPS': True,
-        'BUILD_ZLIB': True,
+        'BUILD_DEPS': False,
+        'BUILD_ZLIB': False,
         'BUILD_absl': True,
         'BUILD_gflags': True,
         'BUILD_glog': True,
         'BUILD_Protobuf': True,
-        'USE_SCIP': True,
-        'BUILD_SCIP': True,
+        'USE_SCIP': False,
+        'BUILD_SCIP': False,
         'USE_COINOR': True,
         'BUILD_CoinUtils': True,
         'BUILD_Osi': True,
@@ -65,11 +65,22 @@ class GORTConan(ConanFile):
         if not self.options.BUILD_ZLIB:
             self.requires("zlib/1.2.11@")
 
+    @property
+    def _archive_url(self):
+        return "https://github.com/google/or-tools/archive/v%s.tar.gz" % self.version
+
+    @property
+    def source_subfolder(self):
+        return "or-tools"
+
     def source(self):
         if self.settings.os == "Windows":
-            self.run("git clone https://github.com/google/or-tools")
-            self.run("cd or-tools && git checkout tags/v%s -b v%s" %
-                     (self.version, self.version))
+            tools.get(self._archive_url)
+            archive = "or-tools-{}".format(self.version)
+            os.rename(archive, self.source_subfolder)
+            # self.run("git clone https://github.com/google/or-tools")
+            # self.run("cd or-tools && git checkout tags/v%s -b v%s" %
+            #         (self.version, self.version))
         else:
             # from https://developers.google.com/optimization/install/cpp/linux
             url = "https://github.com/google/or-tools/releases/download/v%s/" % self.version
@@ -80,7 +91,6 @@ class GORTConan(ConanFile):
     def build(self):
         if self.settings.os == "Windows":
             cmake = CMake(self)
-            cmake.definitions['CMAKE_INSTALL_PREFIX'] = self.package_folder
             cmake.definitions['BUILD_DEPS'] = "ON" if self.options.BUILD_DEPS else "OFF"
             cmake.definitions['BUILD_ZLIB'] = "ON" if self.options.BUILD_ZLIB else "OFF"
             cmake.definitions['BUILD_absl'] = "ON" if self.options.BUILD_absl else "OFF"
@@ -97,17 +107,15 @@ class GORTConan(ConanFile):
             cmake.definitions['BUILD_Cbc'] = "ON" if self.options.BUILD_Cbc else "OFF"
             cmake.definitions['BUILD_SAMPLES'] = "ON" if self.options.BUILD_SAMPLES else "OFF"
             cmake.definitions['BUILD_EXAMPLES'] = "ON" if self.options.BUILD_EXAMPLES else "OFF"
-            cmake_source_folder = self.source_folder + "/or-tools"
-            cmake_build_folder = self.source_folder + "/or-tools"
-            cmake.configure(source_dir=cmake_source_folder,
-                            build_dir=cmake_build_folder)
-            cmake.build(target='install')
+            cmake.configure()
+            cmake.build()
+            cmake.install()
         else:  # assume Linux or compatible
             pass
 
     def package(self):
         if self.settings.os == "Windows":
-            pass
+            tools.rmdir(os.path.join(self.package_folder, "lib", "cmake"))
         else:  # assume Linux or compatible
             self.copy("LICENSE*", src="or-tools/", dst=".")
             self.copy("*", src="or-tools/include", dst="include")
@@ -119,7 +127,6 @@ class GORTConan(ConanFile):
                                       "-DUSE_CLP", "-DUSE_BOP", "-DUSE_GLOP"]
             self.cpp_info.cxxflags.append("/DNOMINMAX")
             common_libs = ["CbcSolver", "Cbc", "OsiCbc", "Cgl", "ClpSolver", "Clp", "OsiClp", "Osi", "CoinUtils",
-                           "libscip",
                            "absl_bad_any_cast_impl", "absl_bad_optional_access", "absl_bad_variant_access", "absl_base", "absl_city",
                            "absl_civil_time", "absl_cord", "absl_debugging_internal", "absl_demangle_internal",
                            "absl_examine_stack", "absl_exponential_biased", "absl_failure_signal_handler", "absl_flags", "absl_flags_config",
@@ -133,6 +140,9 @@ class GORTConan(ConanFile):
                            "absl_spinlock_wait", "absl_stacktrace", "absl_status", "absl_str_format_internal", "absl_strings",
                            "absl_strings_internal", "absl_symbolize", "absl_synchronization", "absl_throw_delegate", "absl_time", "absl_time_zone",
                            "ortools"]
+            if self.options.BUILD_SCIP:
+                common_libs.append("libscip")
+
             common_libs.append("shlwapi")
             common_libs.append("psapi")
             common_libs.append("ws2_32")

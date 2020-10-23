@@ -2,6 +2,9 @@ conan.lock
 conanbuildinfo.txt
 conaninfo.txt
 graph_info.json
-or-tools/
+or-tools*/
 build/
-package/
+debug/
+debug_package/
+.vscode/
+.git/
