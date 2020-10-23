@@ -25,7 +25,10 @@ Any help is VERY welcome!
 
 ## [Unreleased]
 
-## [0.1.0] - 2020-10-22
+### Fixed
+
+- zlib from conan-center: works
+- gflags from conan-center: works
 
 ### Added
 
@@ -33,4 +36,3 @@ Any help is VERY welcome!
 - all cmake build options for or-tools as options for conan (all untested)
 
 [unreleased]: https://github.com/philsuess/conan-or-tools
-[0.1.0]: https://github.com/philsuess/conan-or-tools/tags/v0.1.0
