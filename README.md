@@ -6,7 +6,9 @@ My ultimate goal is to build ortools without any dependencies, but pull them fro
 
 I have not been able to build it this way without dependencies (`cmake.definitions['BUILD_DEPS'] = "OFF"`) and supplying the necessary dependencies via conan packages. Something always fails... :(
 
-Any help is VERY welcome!
+At the moment (see branch re. abseil), it is the requirement to compile all libs using c++17. My machine quits with clp for this. I've had enough... I am going to straight CLP interface without or-tools. Goodbye or-tools. Anybody from google reading this: please come over to our side where we rely on pre-built binaries. If everybody plays nice, everything actually works out nicely. Really.
+
+Still, if anybody else is out there: Any help is (still) VERY welcome!
 
 ## conan workflow
 
