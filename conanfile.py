@@ -43,9 +43,9 @@ class GORTConan(ConanFile):
         'USE_SCIP': False,
         'BUILD_SCIP': False,
         'USE_COINOR': True,
-        'BUILD_CoinUtils': True,
-        'BUILD_Osi': True,
-        'BUILD_Clp': True,
+        'BUILD_CoinUtils': False,
+        'BUILD_Osi': False,
+        'BUILD_Clp': False,
         'BUILD_Cgl': True,
         'BUILD_Cbc': True,
         'BUILD_SAMPLES': False,
@@ -76,6 +76,15 @@ class GORTConan(ConanFile):
 
         if not self.options.BUILD_absl:
             self.requires("abseil/20200923.2@")
+
+        if not self.options.BUILD_CoinUtils:
+            self.requires("coin-utils/2.11.4@")
+
+        if not self.options.BUILD_Osi:
+            self.requires("coin-osi/0.108.6@")
+
+        if not self.options.BUILD_Clp:
+            self.requires("coin-clp/1.17.6@")
 
     @property
     def _archive_url(self):
@@ -138,8 +147,8 @@ class GORTConan(ConanFile):
             self.cpp_info.cxxflags = ["-DUSE_CBC",
                                       "-DUSE_CLP", "-DUSE_BOP", "-DUSE_GLOP"]
             self.cpp_info.cxxflags.append("/DNOMINMAX")
-            common_libs = ["CbcSolver", "Cbc", "OsiCbc", "Cgl",
-                           "ClpSolver", "Clp", "OsiClp", "Osi", "CoinUtils", "ortools"]
+            common_libs = ["CbcSolver", "Cbc",
+                           "OsiCbc", "Cgl", "ortools"]
 
             if self.options.BUILD_absl:
                 common_libs.extend([
@@ -156,6 +165,17 @@ class GORTConan(ConanFile):
                     "absl_spinlock_wait", "absl_stacktrace", "absl_status", "absl_str_format_internal", "absl_strings",
                     "absl_strings_internal", "absl_symbolize", "absl_synchronization", "absl_throw_delegate", "absl_time", "absl_time_zone"
                 ])
+            if self.options.BUILD_CoinUtils:
+                common_libs.append("CoinUtils")
+
+            if self.options.BUILD_Osi:
+                common_libs.append("Osi")
+                common_libs.append("OsiClp")
+
+            if self.options.BUILD_Clp:
+                common_libs.append("ClpSolver")
+                common_libs.append("Clp")
+
             if self.options.BUILD_SCIP:
                 common_libs.append("libscip")
 
